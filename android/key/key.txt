@@ -1,0 +1,22 @@
+keytool -genkey -alias p8CarService -keyalg RSA -validity 20000 -keystore p8CarService.keystore
+
+密钥 p8carservice439915
+C:\Users\Administrator>keytool -genkey -alias p8CarService -keyalg RSA -validity 20000 -keystore p8CarService.keystore
+输入密钥库口令:
+再次输入新口令:
+它们不匹配。请重试
+输入密钥库口令:
+再次输入新口令:
+您的名字与姓氏是什么?
+  [Unknown]:  ywx
+您的组织单位名称是什么?
+  [Unknown]:  p8车服
+您的组织名称是什么?
+  [Unknown]:  p8车服
+您所在的城市或区域名称是什么?
+  [Unknown]:  深圳
+您所在的省/市/自治区名称是什么?
+  [Unknown]:  广东省深圳市南山区
+该单位的双字母国家/地区代码是什么?
+  [Unknown]:  cn
+CN=ywx, OU=p8车服, O=p8车服, L=深圳, ST=广东省深圳市南山区, C=cn是否正确?
