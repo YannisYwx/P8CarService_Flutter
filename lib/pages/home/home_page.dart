@@ -35,52 +35,49 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(backgroundColor: Colors.blue),
-      home: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-            toolbarHeight: Adapt.px(72),
-            centerTitle: true,
-            title: Text(
-              getTitle(),
-              style: TextStyle(fontSize: 18, color: Colors.white),
-            )),
-        body: AnimationLimiter(
-          child: Column(
-            children: [
-              _headView(),
-              Divider(height: 0.0),
-              Expanded(
-                child: ListView.builder(
-                    shrinkWrap: true,
-                    physics: BouncingScrollPhysics(),
-                    itemBuilder: (BuildContext context, int index) {
-                      return AnimationConfiguration.staggeredList(
-                        position: index,
-                        duration: Duration(milliseconds: 600),
-                        child: SlideAnimation(
-                          verticalOffset: 50,
-                          child: FadeInAnimation(
-                            child: XListItem(
-                              _menus[index].menuLabel,
-                              _menus[index].iconRes,
-                              Constants.ASSETS_IMG + 'icon_grey_arrow.png',
-                              dividerNoPadding: index == _menus.length - 1,
-                              tag: _menus[index],
-                              callBack: (tag) {
-                                print('$tag ---- ');
-                                pushToPage(context, tag);
-                              },
-                            ),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+          toolbarHeight: Adapt.px(72),
+          centerTitle: true,
+          title: Text(
+            getTitle(),
+            style: TextStyle(fontSize: 18, color: Colors.white),
+          )),
+      body: AnimationLimiter(
+        child: Column(
+          children: [
+            _headView(),
+            Divider(height: 0.0),
+            Expanded(
+              child: ListView.builder(
+                  shrinkWrap: true,
+                  physics: BouncingScrollPhysics(),
+                  itemBuilder: (BuildContext context, int index) {
+                    return AnimationConfiguration.staggeredList(
+                      position: index,
+                      duration: Duration(milliseconds: 600),
+                      child: SlideAnimation(
+                        verticalOffset: 50,
+                        child: FadeInAnimation(
+                          child: XListItem(
+                            _menus[index].menuLabel,
+                            _menus[index].iconRes,
+                            Constants.ASSETS_IMG + 'icon_grey_arrow.png',
+                            dividerNoPadding: index == _menus.length - 1,
+                            tag: _menus[index],
+                            callBack: (tag) {
+                              print('$tag ---- ');
+                              pushToPage(context, tag);
+                            },
                           ),
                         ),
-                      );
-                    },
-                    itemCount: _menus.length),
-              ),
-            ],
-          ),
+                      ),
+                    );
+                  },
+                  itemCount: _menus.length),
+            ),
+          ],
         ),
       ),
     );

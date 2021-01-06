@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../constant/color_constant.dart';
-import '../constant/app_style.dart';
 
 const int duration = 400;
 
@@ -14,29 +13,34 @@ typedef DropdownMenuChange = void Function(bool isShow, int index);
 ///
 /// des: 下拉选择框
 ///
-class DropdownSelectBox extends StatelessWidget {
+class DropdownSelectBox extends StatefulWidget {
   final List<HeaderItem> headerItems;
   final double headerHeight;
   final List<DropdownMenuBuilder> menus;
 
   final DropdownMenuChange dropdownMenuChange;
 
-  int _currentSelectIndex;
+  final GlobalKey<DropdownBoxHeaderState> headerKey = GlobalKey();
+  final GlobalKey<DropdownMenuState> menuKey = GlobalKey();
 
-  DropdownNotifier _notifier;
-
-  DropdownSelectBox(
+  DropdownSelectBox(Key key,
       {@required this.headerItems,
       this.headerHeight = 48,
       @required this.menus,
-      this.dropdownMenuChange}) :
-    _notifier = DropdownNotifier();
+      this.dropdownMenuChange})
+      : super(key: key);
 
+  @override
+  DropdownSelectBoxState createState() => DropdownSelectBoxState();
+}
 
+class DropdownSelectBoxState extends State<DropdownSelectBox> {
+  int _currentSelectIndex;
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
+    print(
+        '=================================================================================================DropdownSelectBoxState [build]');
     return Container(
       color: Colors.white,
       child: Stack(
@@ -45,75 +49,48 @@ class DropdownSelectBox extends StatelessWidget {
             width: MediaQuery.of(context).size.width,
             top: 0.0,
             left: 0.0,
-            child: DropdownBoxHeader(headerItems, (index) {
-              // setState(() {
-                _currentSelectIndex = index;
-              // });
-            }, headerHeight, _notifier),
+            child: DropdownBoxHeader(widget.headerKey,
+                headerHeight: widget.headerHeight,
+                headerItems: widget.headerItems,
+                menuKey: widget.menuKey, itemSelect: (index) {
+              _currentSelectIndex = index;
+            }),
           ),
           DropdownMenu(
-            dropdownMenuChanged: dropdownMenuChange,
-            headerHeight: headerHeight,
-            menus: menus,
+            widget.menuKey,
+            headerKey: widget.headerKey,
+            dropdownMenuChanged: widget.dropdownMenuChange,
+            headerHeight: widget.headerHeight,
+            menus: widget.menus,
             selectItemIndex: _currentSelectIndex,
-            notifier: _notifier,
           ),
         ],
       ),
     );
   }
-}
 
-// class _DropdownSelectBoxState extends State<DropdownSelectBox>
-//     with SingleTickerProviderStateMixin {
-//
-//   int _currentSelectIndex;
-//
-//   DropdownNotifier _notifier;
-//
-//   @override
-//   void initState() {
-//     print(
-//         '+++++++++++++++++++++++++++++++++++++++++++_DropdownSelectBoxState ========initState');
-//     _notifier = DropdownNotifier();
-//     super.initState();
-//   }
-//
-//   @override
-//   void dispose() {
-//     super.dispose();
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     print(
-//         '+++++++++++++++++++++++++++++++++++++++++++_DropdownSelectBoxState ========build');
-//     return Container(
-//       color: Colors.white,
-//       child: Stack(
-//         children: [
-//           Positioned(
-//             width: MediaQuery.of(context).size.width,
-//             top: 0.0,
-//             left: 0.0,
-//             child: DropdownBoxHeader(widget.headerItems, (index) {
-//               setState(() {
-//                 _currentSelectIndex = index;
-//               });
-//             }, widget.headerHeight, _notifier),
-//           ),
-//           DropdownMenu(
-//             dropdownMenuChanged: widget.dropdownMenuChange,
-//             headerHeight: widget.headerHeight,
-//             menus: widget.menus,
-//             selectItemIndex: _currentSelectIndex,
-//             notifier: _notifier,
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
+  void hide({@required int index, String hideLabel}) {
+    widget.menuKey.currentState.hide(index);
+    if (hideLabel != null && hideLabel.isNotEmpty) {
+      widget.headerItems[index].title = hideLabel;
+    }
+  }
+
+  void show({@required int index}) {
+    widget.menuKey.currentState.show(index);
+  }
+
+  void hideToShow(
+      {@required int hideIndex, @required int showIndex, String hideLabel}) {
+    hide(index: hideIndex);
+    if (hideLabel != null && hideLabel.isNotEmpty) {
+      widget.headerItems[hideIndex].title = hideLabel;
+    }
+    Future.delayed(Duration(milliseconds: duration + 50), () {
+      show(index: showIndex);
+    });
+  }
+}
 
 ///
 /// des: 下拉框头部
@@ -122,16 +99,17 @@ class DropdownBoxHeader extends StatefulWidget {
   final List<HeaderItem> headerItems;
   final double headerHeight;
   final OnHeaderSelect itemSelect;
-  final DropdownNotifier notifier;
+  final GlobalKey<DropdownMenuState> menuKey;
 
-  DropdownBoxHeader(
-      this.headerItems, this.itemSelect, this.headerHeight, this.notifier);
+  DropdownBoxHeader(Key key,
+      {this.headerItems, this.itemSelect, this.headerHeight, this.menuKey})
+      : super(key: key);
 
   @override
-  _DropdownBoxHeaderState createState() => _DropdownBoxHeaderState();
+  DropdownBoxHeaderState createState() => DropdownBoxHeaderState();
 }
 
-class _DropdownBoxHeaderState extends State<DropdownBoxHeader>
+class DropdownBoxHeaderState extends State<DropdownBoxHeader>
     with TickerProviderStateMixin {
   double _headerHeight;
   double _screenWidth;
@@ -148,6 +126,36 @@ class _DropdownBoxHeaderState extends State<DropdownBoxHeader>
     super.initState();
   }
 
+  ///
+  /// 箭头向下
+  ///
+  arrowDown(int index, {String label}) {
+    _resetHeaderItem(index, isUp: false, label: label);
+  }
+
+  ///
+  /// 箭头向上
+  ///
+  arrowUp(int index, {String label}) {
+    _resetHeaderItem(index, isUp: true, label: label);
+  }
+
+  _resetHeaderItem(int index, {@required bool isUp, String label}) {
+    widget.headerItems[index].isFocus = isUp;
+    widget.headerItems[index].needAnimation = true;
+    widget.headerItems[index].iconStatus =
+        isUp ? IconStatus.up : IconStatus.down;
+    if (isUp) {
+      widget.headerItems[index].controller.forward();
+    } else {
+      widget.headerItems[index].controller.reverse();
+    }
+    if (!(label == null || label.isEmpty)) {
+      widget.headerItems[index].title = label;
+    }
+    setState(() {});
+  }
+
   @override
   void dispose() {
     widget.headerItems.forEach((hi) {
@@ -161,14 +169,12 @@ class _DropdownBoxHeaderState extends State<DropdownBoxHeader>
     MediaQueryData mediaQuery = MediaQuery.of(context);
     _screenWidth = mediaQuery.size.width;
     _menuCount = widget.headerItems.length;
-
     var gridView = GridView.count(
       crossAxisCount: _menuCount,
       physics: NeverScrollableScrollPhysics(),
       childAspectRatio: (_screenWidth / _menuCount) / _headerHeight,
       children: widget.headerItems.map((e) => _createHeader(e)).toList(),
     );
-
     return Container(
       height: _headerHeight,
       decoration: BoxDecoration(
@@ -215,75 +221,39 @@ class _DropdownBoxHeaderState extends State<DropdownBoxHeader>
             right: -.05,
             child: Container(
               width: 0.68,
-              height: _headerHeight * 0.6,
+              height: _headerHeight * 0.5,
               color: widget.headerItems.indexOf(headerItem) ==
                       widget.headerItems.length - 1
                   ? Colors.transparent
-                  : Colors.grey[400],
+                  : Colors.grey[300],
             ),
           )
         ],
       ),
-      onTap: () {
-        int index = widget.headerItems.indexOf(headerItem);
-        int menuIndex = widget.notifier.menuIndex;
-
-        widget.headerItems[index].needAnimation = true;
-
-        for (int i = 0; i < widget.headerItems.length; i++) {
-          widget.headerItems[i].needAnimation =
-              (i == index || (i == menuIndex && widget.notifier.isShow));
-          widget.headerItems[i].iconStatus = IconStatus.down;
-        }
-
-        print('onTap  index = $index menuIndex = $menuIndex');
-
-        if (index == menuIndex) {
-          // 点击当前的菜单
-          if (widget.notifier.isShow) {
-            //当前的菜单内容是显示状态则关闭
-            print('onTap 点击当前的菜单 【点击index = $index 】 隐藏');
-            widget.notifier.hide();
-            widget.headerItems[index].iconStatus = IconStatus.down;
-            widget.headerItems[index].isFocus = false;
-          } else {
-            // 显示选中的菜单内容
-            print('onTap 点击当前的菜单 【点击index = $index 】 显示');
-            widget.notifier.show(index);
-            widget.headerItems[index].iconStatus = IconStatus.up;
-            widget.headerItems[index].isFocus = true;
-          }
-        } else {
-          //点击其他的菜单
-          widget.notifier.isFirstHideThenShow = widget.notifier.isShow;
-          if (widget.notifier.isShow) {
-            print('onTap 【点击index = $index 】 hideToShow');
-            widget.notifier.hideToShow(index);
-            widget.headerItems[menuIndex].iconStatus = IconStatus.down;
-            widget.headerItems[menuIndex].isFocus = false;
-          } else {
-            print('onTap 【点击index = $index 】 show');
-            widget.notifier.show(index);
-          }
-          widget.headerItems[index].iconStatus = IconStatus.up;
-          widget.headerItems[index].isFocus = true;
-        }
-        setState(() {});
-        if (widget.itemSelect != null) {
-          widget.itemSelect(widget.headerItems.indexOf(headerItem));
-        }
-
-        widget.headerItems.forEach((hi) {
-          if (hi.needAnimation) {
-            if (hi.iconStatus == IconStatus.down) {
-              hi.reverse();
-            } else {
-              hi.forward();
-            }
-          }
-        });
-      },
+      onTap: () => _onHeaderTap(headerItem),
     );
+  }
+
+  _onHeaderTap(HeaderItem headerItem) {
+    int index = widget.headerItems.indexOf(headerItem);
+    int menuIndex = widget.menuKey.currentState.currentMenuIndex;
+    if (index == menuIndex) {
+      // 点击当前的菜单
+      if (widget.menuKey.currentState.isShowDropBox) {
+        //当前的菜单内容是显示状态则关闭
+        widget.menuKey.currentState.hide(index);
+      } else {
+        // 显示选中的菜单内容
+        widget.menuKey.currentState.show(index);
+      }
+    } else {
+      //点击其他的菜单
+      if (widget.menuKey.currentState.isShowDropBox) {
+        widget.menuKey.currentState.hideToShow(menuIndex, index);
+      } else {
+        widget.menuKey.currentState.show(index);
+      }
+    }
   }
 
   TextStyle _itemStyle(HeaderItem headerItem) {
@@ -297,26 +267,26 @@ class DropdownMenu extends StatefulWidget {
   final double headerHeight;
   final List<DropdownMenuBuilder> menus;
   final int selectItemIndex;
-  final DropdownNotifier notifier;
   final Color maskColor;
   final DropdownMenuChange dropdownMenuChanged;
+  final GlobalKey<DropdownBoxHeaderState> headerKey;
 
-  DropdownMenu({
+  DropdownMenu(
+    Key key, {
+    this.headerKey,
     this.headerHeight,
     this.menus,
     this.selectItemIndex,
-    this.notifier,
     this.maskColor = const Color.fromRGBO(0, 0, 0, 0.5),
     this.dropdownMenuChanged,
-  });
+  }) : super(key: key);
 
   @override
-  _DropdownMenuState createState() => _DropdownMenuState();
+  DropdownMenuState createState() => DropdownMenuState();
 }
 
-class _DropdownMenuState extends State<DropdownMenu>
+class DropdownMenuState extends State<DropdownMenu>
     with SingleTickerProviderStateMixin {
-  bool _isShowDropDownItemWidget = false; //是否显示下拉菜单
   bool _isShowMask = false;
   bool _isControllerDisposed = false;
   Animation<double> _animation;
@@ -326,14 +296,13 @@ class _DropdownMenuState extends State<DropdownMenu>
 
   double _dropDownHeight;
 
-  int _currentMenuIndex;
+  int currentMenuIndex = 0;
 
-  bool _isShowDropBox = false;
+  bool isShowDropBox = false;
 
   @override
   void initState() {
     super.initState();
-    widget.notifier.addListener(_showDropDownItemWidget);
     _controller = new AnimationController(
         duration: Duration(milliseconds: duration), vsync: this);
   }
@@ -342,43 +311,49 @@ class _DropdownMenuState extends State<DropdownMenu>
   void dispose() {
     _animation?.removeListener(_animationListener);
     _animation?.removeStatusListener(_animationStatusListener);
-    widget.notifier?.removeListener(_showDropDownItemWidget);
     _controller?.dispose();
     _isControllerDisposed = true;
     super.dispose();
   }
 
-  /// 显示下拉框
-  _showDropDownItemWidget() {
-    _currentMenuIndex = widget.notifier.menuIndex;
-    _dropDownHeight =
-        widget.menus[_currentMenuIndex].dropDownHeight; //更新当前的菜单高度
-    if (_currentMenuIndex >= widget.menus.length ||
-        widget.menus[_currentMenuIndex] == null) {
+  show(int index) {
+    _showOrHide(index, true);
+  }
+
+  hide(int index) {
+    _showOrHide(index, false);
+  }
+
+  void hideToShow(int hideIndex, int showIndex) {
+    hide(hideIndex);
+    Future.delayed(Duration(milliseconds: duration + 50), () {
+      show(showIndex);
+    });
+  }
+
+  _showOrHide(int index, bool isShow) {
+    if (index >= widget.menus.length || widget.menus[index] == null) {
       return;
     }
-
-    _isShowDropDownItemWidget = !_isShowDropDownItemWidget;
-    // if (widget.dropdownMenuChanging != null) {
-    //   widget.dropdownMenuChanging(_isShowDropDownItemWidget, _currentMenuIndex);
-    // }
+    isShowDropBox = isShow;
+    if (isShowDropBox) {
+      currentMenuIndex = index;
+    }
+    _dropDownHeight = widget.menus[currentMenuIndex].dropDownHeight; //更新当前的菜单高度
     if (!_isShowMask) {
       _isShowMask = true;
     }
     _animation?.removeListener(_animationListener);
     _animation?.removeStatusListener(_animationStatusListener);
     _animation =
-        new Tween<double>(begin: 0.0, end: _dropDownHeight).animate(_controller)
+        Tween<double>(begin: 0.0, end: _dropDownHeight).animate(_controller)
           ..addListener(_animationListener)
           ..addStatusListener(_animationStatusListener);
-
     if (_isControllerDisposed) return;
-    if (widget.notifier.isShow) {
+    if (isShow) {
       _controller.forward();
-    } else if (widget.notifier.isShowHideAnimation) {
-      _controller.reverse();
     } else {
-      _controller.value = 0;
+      _controller.reverse();
     }
   }
 
@@ -398,22 +373,19 @@ class _DropdownMenuState extends State<DropdownMenu>
     switch (status) {
       case AnimationStatus.dismissed:
         _isShowMask = false;
-        if (widget.notifier.isFirstHideThenShow) {
-          widget.notifier.showNext();
-        }
         if (widget.dropdownMenuChanged != null) {
-          widget.dropdownMenuChanged(false, _currentMenuIndex);
+          widget.dropdownMenuChanged(false, currentMenuIndex);
         }
         break;
       case AnimationStatus.forward:
-        // TODO: Handle this case.
+        widget.headerKey.currentState.arrowUp(currentMenuIndex);
         break;
       case AnimationStatus.reverse:
-        // TODO: Handle this case.
+        widget.headerKey.currentState.arrowDown(currentMenuIndex);
         break;
       case AnimationStatus.completed:
         if (widget.dropdownMenuChanged != null) {
-          widget.dropdownMenuChanged(true, _currentMenuIndex);
+          widget.dropdownMenuChanged(true, currentMenuIndex);
         }
         break;
     }
@@ -421,7 +393,6 @@ class _DropdownMenuState extends State<DropdownMenu>
 
   @override
   Widget build(BuildContext context) {
-    int menuIndex = widget.notifier.menuIndex;
     return Positioned(
       width: MediaQuery.of(context).size.width,
       top: widget.headerHeight,
@@ -432,7 +403,7 @@ class _DropdownMenuState extends State<DropdownMenu>
             color: Colors.white,
             width: MediaQuery.of(context).size.width,
             height: _animation == null ? 0 : _animation.value,
-            child: widget.menus[menuIndex].dropDownWidget,
+            child: widget.menus[currentMenuIndex].dropDownWidget,
           ),
           _mask(),
         ],
@@ -444,13 +415,12 @@ class _DropdownMenuState extends State<DropdownMenu>
     if (_isShowMask) {
       return GestureDetector(
         onTap: () {
-          widget.notifier.hide();
+          hide(currentMenuIndex);
         },
         child: Container(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
           color: widget.maskColor.withOpacity(_maskColorOpacity),
-//          color: widget.maskColor,
         ),
       );
     } else {
@@ -458,22 +428,6 @@ class _DropdownMenuState extends State<DropdownMenu>
         height: 0,
       );
     }
-  }
-
-  /// 灰色蒙层
-  Widget _createMask() {
-    return TweenAnimationBuilder(
-      duration: Duration(milliseconds: duration),
-      tween: Tween<double>(
-          begin: _isShowDropBox ? 0.0 : 0.3, end: _isShowDropBox ? 0.3 : 0.0),
-      builder: (BuildContext context, double value, Widget child) {
-        return Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          color: Color.fromRGBO(0, 0, 0, value),
-        );
-      },
-    );
   }
 }
 
@@ -496,7 +450,7 @@ class HeaderItem {
       fontWeight: FontWeight.w400,
       color: ColorConstants.textLightGray); //灰色字体样式
 
-  final String title;
+  String title;
   final Color focusColor;
   final Color normalColor;
   final IconData iconData;
@@ -524,12 +478,12 @@ class HeaderItem {
     this.controller = controller;
   }
 
-  void forward() {
-    controller.forward();
+  void forward({double from}) {
+    controller.forward(from: from);
   }
 
-  void reverse() {
-    controller.reverse();
+  void reverse({double from}) {
+    controller.reverse(from: from);
   }
 
   @override
@@ -542,48 +496,4 @@ enum IconStatus {
   up,
   down,
   none,
-}
-
-class DropdownNotifier extends ChangeNotifier {
-  double dropDownHeaderHeight;
-
-  int menuIndex = 0; //当前显示的菜单
-
-  bool isShow = false; //是否显示中
-
-  bool isShowHideAnimation = false;
-
-  bool isFirstHideThenShow = false; //先隐藏再显示
-
-  int thenShowIndex = 0;
-
-  void show(int index) {
-    isShow = true;
-    menuIndex = index;
-    notifyListeners();
-  }
-
-  void hide({bool isShowHideAnimation = true}) {
-    this.isShowHideAnimation = isShowHideAnimation;
-    isShow = false;
-    notifyListeners();
-  }
-
-  void hideToShow(int index) {
-    isFirstHideThenShow = true;
-    isShowHideAnimation = true;
-    thenShowIndex = index;
-    isShow = false;
-    notifyListeners();
-  }
-
-  void showNext() {
-    Future.delayed(Duration(milliseconds: 50), () {
-      print('_____showNext');
-      isFirstHideThenShow = false;
-      isShow = true;
-      menuIndex = thenShowIndex;
-      notifyListeners();
-    });
-  }
 }

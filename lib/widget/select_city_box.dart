@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:p8_inspection_flutter/constant/constants.dart';
 import '../bean/province_city_area.dart';
 
 typedef SelectCallback = void Function(
@@ -30,12 +31,14 @@ class SelectCityBox extends StatefulWidget {
   final Color indicatorColor;
   final Decoration decoration;
   final bool needStreet; //是否需要显示街道 默认不显示。一般来说按照业务需求，需要的街道都是从后台获取的
-  final StreetSetter streetSetter; //设置街道
+  StreetSetter streetSetter; //设置街道
   int selectProvinceIndex = -1;
   int selectCityIndex = -1;
   int selectAreaIndex = -1;
   int selectStreetIndex = -1;
   int focusLabelIndex = INDEX_PROVINCE;
+
+  final Widget emptyView;
 
   SelectCityBox(
       {@required this.callback,
@@ -51,7 +54,8 @@ class SelectCityBox extends StatefulWidget {
       this.selectCityIndex = -1,
       this.selectAreaIndex = -1,
       this.selectStreetIndex = -1,
-      this.focusLabelIndex = INDEX_PROVINCE});
+      this.focusLabelIndex = INDEX_PROVINCE,
+      this.emptyView});
 
   @override
   _SelectCityBoxState createState() => _SelectCityBoxState();
@@ -93,11 +97,14 @@ class _SelectCityBoxState extends State<SelectCityBox>
   Color _textColor;
   Color _indicatorColor;
 
+  bool isEmpty = true;
+
   initAddressData(int selectProvinceIndex, int selectCityIndex,
       int selectAreaIndex, int selectStreetIndex, int focusLabelIndex) {}
 
   @override
   void initState() {
+    print('=================================================SelectCityBox=============initState');
     _initData();
     super.initState();
   }
@@ -112,6 +119,10 @@ class _SelectCityBoxState extends State<SelectCityBox>
         : widget.focusColor;
     _textColor = widget.textColor == null ? Colors.black54 : widget.textColor;
 
+    if (widget.streetSetter == null) {
+      widget.streetSetter = StreetSetter();
+    }
+
     _decoration = widget.decoration == null
         ? BoxDecoration(
             color: Colors.white,
@@ -124,17 +135,21 @@ class _SelectCityBoxState extends State<SelectCityBox>
   }
 
   _initData() {
+    if (widget.streetSetter == null) {
+      widget.streetSetter = StreetSetter();
+    }
     selectProvince = toSelect;
     selectCity = toSelect;
     selectArea = toSelect;
     selectStreet = toSelect;
     currentIndex = widget.focusLabelIndex;
+    _fontSize = widget.fontSize == null ? 18.0 : widget.fontSize;
 
     provinceData = ProvinceData.getProvinces();
     _fillProvinces(selectIndex: widget.selectProvinceIndex);
     _fillCities(selectIndex: widget.selectCityIndex);
     _fillAreas(selectIndex: widget.selectAreaIndex);
-    streets = List();
+    streets = widget.streetSetter.data == null ? List() : widget.streetSetter.data;
     initAddressLabels(widget.focusLabelIndex,
         isCityVisible: widget.selectCityIndex != -1,
         isAreaVisible: widget.selectAreaIndex != -1,
@@ -214,6 +229,7 @@ class _SelectCityBoxState extends State<SelectCityBox>
   @override
   Widget build(BuildContext context) {
     _initStyle(context);
+    isEmpty = _currentListData().isEmpty && widget.streetSetter.isEmpty;
     return SingleChildScrollView(
       physics: NeverScrollableScrollPhysics(),
       child: Container(
@@ -253,35 +269,42 @@ class _SelectCityBoxState extends State<SelectCityBox>
             ),
             SizedBox(
               height: 380,
-              child: Padding(
-                padding: EdgeInsets.only(top: 5),
-                child: ListView.builder(
-                  physics: BouncingScrollPhysics(),
-                  itemBuilder: (BuildContext context, int index) {
-                    Address address = _currentListData()[index];
-                    return InkWell(
-                      child: Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: 50,
-                        alignment: Alignment.centerLeft,
-                        color: address.isSelect ? Colors.black12 : Colors.white,
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: PAD),
-                          child: Text(_currentListData()[index].name,
-                              maxLines: 1,
-                              style: TextStyle(
-                                  fontSize: _fontSize,
-                                  fontWeight: FontWeight.w400,
-                                  color: address.isSelect
-                                      ? _focusColor
-                                      : _textColor)),
-                        ),
-                      ),
-                      onTap: () => _onItemClick(context, index),
-                    );
-                  },
-                  itemCount: _currentListData().length,
-                ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(top: 5),
+                    child: ListView.builder(
+                      physics: BouncingScrollPhysics(),
+                      itemBuilder: (BuildContext context, int index) {
+                        Address address = _currentListData()[index];
+                        return InkWell(
+                          child: Container(
+                              width: MediaQuery.of(context).size.width,
+                              height: 40,
+                              alignment: Alignment.centerLeft,
+                              color: address.isSelect
+                                  ? Colors.black12
+                                  : Colors.white,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: PAD),
+                                child: Text(_currentListData()[index].name,
+                                    maxLines: 1,
+                                    style: TextStyle(
+                                        fontSize: _fontSize,
+                                        fontWeight: FontWeight.w400,
+                                        color: address.isSelect
+                                            ? _focusColor
+                                            : _textColor)),
+                              )),
+                          onTap: () => _onItemClick(context, index),
+                        );
+                      },
+                      itemCount: _currentListData().length,
+                    ),
+                  ),
+                  _emptyView(),
+                ],
               ),
             )
           ],
@@ -290,58 +313,92 @@ class _SelectCityBoxState extends State<SelectCityBox>
     );
   }
 
+  _emptyView() {
+    return Offstage(
+      offstage: !isEmpty,
+      child: widget.emptyView == null
+          ? Column(
+              children: [
+                SizedBox(height: 40),
+                SizedBox(
+                  width: 350 * 0.3,
+                  height: 420 * 0.3,
+                  child: AspectRatio(
+                    aspectRatio: 42 / 35,
+                    child: Image.asset(
+                      Constants.ASSETS_IMG + "pic_no_data.png",
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  '暂时没找到数据~',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black38,
+                      fontSize: 18),
+                ),
+              ],
+            )
+          : widget.emptyView,
+    );
+  }
+
   ///
   /// 点击列表选中当前的地址
   ///
   _onItemClick(BuildContext context, int index) {
+    widget.streetSetter.isEmpty = false;
     Address address = _currentListData()[index];
     _currentListData().forEach((element) {
       element.isSelect = (element == address);
     });
 
     currentIndex++;
+    int focusIndex = currentIndex - 1;
+
     //不需要显示街道
     if (currentIndex == SelectCityBox.INDEX_STREET && !widget.needStreet) {
       currentIndex = SelectCityBox.INDEX_AREA;
-      setState(() {
-        selectArea = address.name;
-        initAddressLabels(currentIndex,
-            isCityVisible: currentIndex >= SelectCityBox.INDEX_CITY,
-            isAreaVisible: currentIndex >= SelectCityBox.INDEX_AREA,
-            isStreetVisible: currentIndex == SelectCityBox.INDEX_STREET &&
-                widget.needStreet);
-
-        _indicatorWidth = selectArea.length * _fontSize;
-        _notifyStatus();
-      });
-      return;
-    }
-
-    if (currentIndex >= als.length) {
-      currentIndex = als.length - 1;
-    }
-    if (currentIndex == 1) {
+      selectArea = address.name;
+      focusIndex = SelectCityBox.INDEX_AREA;
+    } else if (currentIndex > SelectCityBox.INDEX_STREET) {
+      //原本就是街道
+      focusIndex = SelectCityBox.INDEX_STREET;
+      currentIndex = SelectCityBox.INDEX_STREET;
+      selectStreet = address.name;
+      if (widget.callback != null) {
+        widget.callback(selectProvince, selectCity, selectArea, selectStreet);
+      }
+    } else if (currentIndex == SelectCityBox.INDEX_STREET) {
+      selectStreet = toSelect;
+      selectArea = address.name;
+      if (streets.isEmpty) {
+        if (widget.callback != null) {
+          widget.callback(selectProvince, selectCity, selectArea, null);
+        }
+      }
+    } else if (currentIndex == SelectCityBox.INDEX_CITY) {
       _province = provinceData[index];
       selectProvince = _province.name;
       selectCity = toSelect;
       selectArea = toSelect;
       selectStreet = toSelect;
       _fillCities(selectIndex: widget.selectCityIndex);
-    } else if (currentIndex == 2) {
+    } else if (currentIndex == SelectCityBox.INDEX_AREA) {
       _city = _province.cities.firstWhere((city) => city.name == address.name);
       selectCity = _city.name;
       selectArea = toSelect;
       selectStreet = toSelect;
       _fillAreas(selectIndex: widget.selectAreaIndex);
-    } else if (currentIndex == 3) {
-      selectArea = address.name;
-      selectStreet = toSelect;
     }
 
-    initAddressLabels(currentIndex - 1,
-        isCityVisible: currentIndex >= 1,
-        isAreaVisible: currentIndex >= 2,
-        isStreetVisible: currentIndex == 3 && widget.needStreet);
+    initAddressLabels(focusIndex,
+        isCityVisible: currentIndex >= SelectCityBox.INDEX_CITY,
+        isAreaVisible: currentIndex >= SelectCityBox.INDEX_AREA,
+        isStreetVisible:
+            currentIndex == SelectCityBox.INDEX_STREET && widget.needStreet);
     _moveIndicator(currentIndex);
 
     if (widget.callback != null) {
@@ -415,6 +472,9 @@ class _SelectCityBoxState extends State<SelectCityBox>
         isFocus: focusIndex == SelectCityBox.INDEX_STREET,
         value: selectStreet,
         isVisible: isStreetVisible));
+
+    _indicatorWidth =
+        als.firstWhere((al) => al.isFocus).value.length * _fontSize;
     return als;
   }
 
@@ -428,7 +488,7 @@ class _SelectCityBoxState extends State<SelectCityBox>
   /// 移动指示器
   ///
   void _moveIndicator(int index) {
-    if (index == 3 && !widget.needStreet) {
+    if (currentIndex == SelectCityBox.INDEX_STREET && !widget.needStreet) {
       return;
     }
     currentIndex = index;
@@ -534,7 +594,7 @@ class Address {
   final String name;
   bool isSelect;
 
-  Address({this.name, this.isSelect});
+  Address({this.name, this.isSelect = false});
 }
 
 ///
@@ -544,9 +604,13 @@ class StreetSetter extends ChangeNotifier {
   List<Address> data;
   bool isEmpty = false;
 
-  setStreet({@required List<Address> data}) {
-    this.data = data;
-    this.isEmpty = this.data == null || this.data.isEmpty;
+  setStreet({@required List<Address> data, bool isEmpty}) {
+    this.data = (data == null ? List() : data);
+    if (isEmpty != null) {
+      this.isEmpty = isEmpty;
+    } else {
+      this.isEmpty = this.data == null || this.data.isEmpty;
+    }
     notifyListeners();
   }
 }
