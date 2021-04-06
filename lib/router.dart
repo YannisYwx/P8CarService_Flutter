@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:p8_inspection_flutter/pages/entry/entry_page.dart';
-import 'package:p8_inspection_flutter/pages/entry/login_page.dart';
-import 'package:p8_inspection_flutter/pages/home/home_page.dart';
-import 'package:p8_inspection_flutter/pages/home/parking_monitor_page.dart';
-import 'package:p8_inspection_flutter/pages/webview_page.dart';
+import 'package:p8_inspection_flutter/ui/pages/entry/entry_page.dart';
+import 'package:p8_inspection_flutter/ui/pages/entry/login_page.dart';
+import 'package:p8_inspection_flutter/ui/pages/home/home_page.dart';
+import 'package:p8_inspection_flutter/ui/pages/home/parking_monitor_page.dart';
+import 'package:p8_inspection_flutter/ui/pages/webview_page.dart';
 
 class Routers extends PageRouteBuilder {
   static const entryPage = "app://";

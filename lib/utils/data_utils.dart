@@ -4,8 +4,7 @@ import 'package:flustars/flustars.dart';
 import 'package:flutter/material.dart';
 import 'package:p8_inspection_flutter/bean/login_info.dart';
 import 'package:p8_inspection_flutter/constant/constants.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:p8_inspection_flutter/utils/event_bus.dart';
 ///
 /// des:
 ///

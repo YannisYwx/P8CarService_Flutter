@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../widget/x_appbar.dart';
-import '../android_back_desktop.dart';
 
 ///
 /// des:

@@ -1,13 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:p8_inspection_flutter/constant/constants.dart';
-import '../../widget/x_appbar.dart';
-
-import '../../widget/dropdown_select_box.dart';
-import '../../widget/select_city_box.dart';
-import '../../widget/BerthStatusBox.dart';
-import '../../widget/x_page.dart';
-import '../../utils/screen_adapter.dart';
+import 'package:p8_inspection_flutter/ui/widget/BerthStatusBox.dart';
+import 'package:p8_inspection_flutter/ui/widget/dropdown_select_box.dart';
+import 'package:p8_inspection_flutter/ui/widget/select_city_box.dart';
+import 'package:p8_inspection_flutter/ui/widget/x_page.dart';
+import 'package:p8_inspection_flutter/utils/screen_adapter.dart';
 
 ///
 /// des: 停车监控
@@ -62,9 +60,9 @@ class _ParkingMonitorPageState extends State<ParkingMonitorPage> {
   @override
   Widget build(BuildContext context) {
     return XPage(
-        context,
+      context,
       hasBackIcon: true,
-      title: '停车监控1',
+      title: '停车监控',
       body: DropdownSelectBox(
         _boxKey,
         dropdownMenuChange: (isShow, index) {
@@ -166,7 +164,7 @@ class _ParkingMonitorPageState extends State<ParkingMonitorPage> {
     _street = street;
     if (_street != null && _street.isNotEmpty) {
       if (_berthStatus != null && _berthStatus.isNotEmpty) {
-        _boxKey.currentState.hide(index: 0,hideLabel: _street);
+        _boxKey.currentState.hide(index: 0, hideLabel: _street);
       } else {
         _boxKey.currentState
             .hideToShow(hideIndex: 0, showIndex: 1, hideLabel: _street);

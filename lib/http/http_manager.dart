@@ -1,12 +1,9 @@
-import 'dart:math';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:p8_inspection_flutter/http/api.dart';
 import 'package:p8_inspection_flutter/http/response_interceptor.dart';
 import 'package:p8_inspection_flutter/http/result_data.dart';
-import 'package:p8_inspection_flutter/widget/loading_dialog.dart';
 
 import 'code.dart';
 import 'dio_log_interceptor.dart';

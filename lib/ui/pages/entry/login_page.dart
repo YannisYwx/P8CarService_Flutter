@@ -11,7 +11,7 @@ import 'package:p8_inspection_flutter/router.dart';
 import 'package:p8_inspection_flutter/utils/data_utils.dart';
 import 'package:p8_inspection_flutter/utils/screen_adapter.dart';
 import 'package:p8_inspection_flutter/utils/toast_util.dart';
-import 'package:p8_inspection_flutter/widget/x_edit_text.dart';
+import 'package:p8_inspection_flutter/ui/widget/x_edit_text.dart';
 
 class LoginPage extends StatefulWidget {
   final EntryType _entryType;
@@ -59,8 +59,7 @@ class _LoginState extends State<LoginPage> with TickerProviderStateMixin {
     bool normalStyle = false;
     return Container(
       color: ColorConstants.backgroundColor,
-      child:
-      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Container(
             color: Colors.white,
             height: Adapt.px(350),
@@ -70,10 +69,9 @@ class _LoginState extends State<LoginPage> with TickerProviderStateMixin {
                     top: Adapt.px(128),
                     right: Adapt.px(103)),
                 child: Column(children: [
-                  Row(children: [
+                  Row(mainAxisAlignment: MainAxisAlignment.start, children: [
                     Image.asset(Constants.ASSETS_IMG + "logo.png",
-                        width: Adapt.px(74 * 0.6),
-                        height: Adapt.px(112 * 0.6)),
+                        width: Adapt.px(74 * 0.6), height: Adapt.px(112 * 0.6)),
                     SizedBox(width: 5),
                     Text('欢迎使用P8车服',
                         style: TextStyle(
@@ -96,53 +94,51 @@ class _LoginState extends State<LoginPage> with TickerProviderStateMixin {
               left: Adapt.px(34), right: Adapt.px(34), top: Adapt.px(20)),
           child: normalStyle
               ? TextField(
-              decoration: InputDecoration(
-                  icon: Text('账号：',
-                      style: TextStyle(
-                          color: ColorConstants.textLightBlack,
-                          fontSize: Adapt.px(24),
-                          fontWeight: FontWeight.w500)),
-                  labelText: '账号',
-                  hintText: '请输入您的账号（手机号码）'))
+                  decoration: InputDecoration(
+                      icon: Text('账号：',
+                          style: TextStyle(
+                              color: ColorConstants.textLightBlack,
+                              fontSize: Adapt.px(24),
+                              fontWeight: FontWeight.w500)),
+                      labelText: '账号',
+                      hintText: '请输入您的账号（手机号码）'))
               : XTextField(
-              text: _account,
-              hintText: "请输入您的账号（手机号码）",
-              labelText: '账号',
-              leftWidget: Icon(Icons.person),
-              isShowDeleteBtn: true,
-              isDense: true,
-              isPwd: false,
-              enabledBorder: enabledBorder,
-              focusedBorder: focusedBorder,
-              inputCallBack: (val) => _account = val),
+                  text: _account,
+                  hintText: "请输入您的账号（手机号码）",
+                  labelText: '账号',
+                  leftWidget: Icon(Icons.person),
+                  isShowDeleteBtn: true,
+                  isDense: true,
+                  isPwd: false,
+                  enabledBorder: enabledBorder,
+                  focusedBorder: focusedBorder,
+                  inputCallBack: (val) => _account = val),
         ),
         Padding(
             padding: EdgeInsets.only(
-                left: Adapt.px(34),
-                right: Adapt.px(34),
-                top: Adapt.px(20)),
+                left: Adapt.px(34), right: Adapt.px(34), top: Adapt.px(20)),
             child: normalStyle
                 ? TextField(
-                obscureText: true,
-                decoration: InputDecoration(
-                    icon: Text('密码：',
-                        style: TextStyle(
-                            color: ColorConstants.textLightBlack,
-                            fontSize: Adapt.px(24),
-                            fontWeight: FontWeight.w500)),
-                    hintText: '请输入您的密码',
-                    labelText: '请输入六位有效数字或字母'))
+                    obscureText: true,
+                    decoration: InputDecoration(
+                        icon: Text('密码：',
+                            style: TextStyle(
+                                color: ColorConstants.textLightBlack,
+                                fontSize: Adapt.px(24),
+                                fontWeight: FontWeight.w500)),
+                        hintText: '请输入您的密码',
+                        labelText: '请输入六位有效数字或字母'))
                 : XTextField(
-                text: _password,
-                hintText: "请输入六位有效数字或字母",
-                labelText: '密码',
-                leftWidget: Icon(Icons.lock),
-                isShowDeleteBtn: true,
-                isDense: true,
-                isPwd: true,
-                enabledBorder: enabledBorder,
-                focusedBorder: focusedBorder,
-                inputCallBack: (val) => _password = val)),
+                    text: _password,
+                    hintText: "请输入六位有效数字或字母",
+                    labelText: '密码',
+                    leftWidget: Icon(Icons.lock),
+                    isShowDeleteBtn: true,
+                    isDense: true,
+                    isPwd: true,
+                    enabledBorder: enabledBorder,
+                    focusedBorder: focusedBorder,
+                    inputCallBack: (val) => _password = val)),
         Padding(
           padding: EdgeInsets.only(
               left: Adapt.px(34),
@@ -166,12 +162,10 @@ class _LoginState extends State<LoginPage> with TickerProviderStateMixin {
                   hoverColor: Colors.blue,
                   color: Colors.blue,
                   splashColor: Colors.white12,
-                  child: Text('登录',
-                      style: TextStyle(fontSize: Adapt.px(25))),
+                  child: Text('登录', style: TextStyle(fontSize: Adapt.px(25))),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5),
-                      side: BorderSide(
-                          color: Colors.blueAccent, width: 1)))),
+                      side: BorderSide(color: Colors.blueAccent, width: 1)))),
         ),
       ]),
     );
@@ -202,7 +196,8 @@ class _LoginState extends State<LoginPage> with TickerProviderStateMixin {
           }
           loginInfo.userType = _entryType.type;
           DataUtils.saveLoginInfo(loginInfo);
-          await EasyLoading.showSuccess('登录成功!' ,maskType: EasyLoadingMaskType.black);
+          await EasyLoading.showSuccess('登录成功!',
+              maskType: EasyLoadingMaskType.black);
           Routers.push(context, Routers.homePage, loginInfo);
         },
         fail: (code, msg) {
@@ -212,6 +207,4 @@ class _LoginState extends State<LoginPage> with TickerProviderStateMixin {
           });
         });
   }
-
-
 }

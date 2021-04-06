@@ -7,10 +7,10 @@ import 'package:p8_inspection_flutter/constant/color_constant.dart';
 import 'package:p8_inspection_flutter/constant/constants.dart';
 import 'package:p8_inspection_flutter/router.dart';
 import 'package:p8_inspection_flutter/utils/screen_adapter.dart';
-import 'package:p8_inspection_flutter/widget/x_avatar.dart';
-import 'package:p8_inspection_flutter/widget/x_list_item.dart';
+import 'package:p8_inspection_flutter/ui/widget/x_avatar.dart';
+import 'package:p8_inspection_flutter/ui/widget/x_list_item.dart';
 import 'package:p8_inspection_flutter/bean/user_menu.dart';
-import 'package:p8_inspection_flutter/pages/home/parking_monitor_page.dart';
+import 'package:p8_inspection_flutter/ui/pages/home/parking_monitor_page.dart';
 
 ///
 /// des: 主页

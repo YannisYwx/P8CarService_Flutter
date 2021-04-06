@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../utils/screen_adapter.dart';
+import 'package:p8_inspection_flutter/utils/screen_adapter.dart';
 
 typedef _OnActionClick = void Function();
 

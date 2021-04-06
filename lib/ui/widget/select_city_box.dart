@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:p8_inspection_flutter/bean/province_city_area.dart';
 import 'package:p8_inspection_flutter/constant/constants.dart';
-import '../bean/province_city_area.dart';
 
 typedef SelectCallback = void Function(
     String province, String city, String area, String street);

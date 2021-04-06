@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../constant/color_constant.dart';
+import 'package:p8_inspection_flutter/constant/color_constant.dart';
 
 const int duration = 400;
 
